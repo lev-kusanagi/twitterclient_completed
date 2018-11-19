@@ -26,19 +26,19 @@ class ViewController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
         navigationItem.title = "Twitter Home"
         
-        collectionView?.backgroundColor = UIColor.whiteColor()
+        collectionView?.backgroundColor = UIColor.white
         collectionView?.alwaysBounceVertical = true
-        collectionView?.registerClass(StatusCell.self, forCellWithReuseIdentifier: ViewController.cellId)
+        collectionView?.register(StatusCell.self, forCellWithReuseIdentifier: ViewController.cellId)
         
-        let twitter = STTwitterAPI(OAuthConsumerKey: "DpGzxTKxAzW7jYLNF3pXyCq1R", consumerSecret: "F4i0xKVaQ8rbjnZEoUngzoeRQ5YDR4OBriyOs8XhgdbLcuJJCg", oauthToken: "4912299642-VVtj7EQbXRtGkjN4VKGw8CIdaYbLyJkVgUEJ2kc", oauthTokenSecret: "CUrPjIDUVU9LUU31ONOC1MenJW7ZJdpPkBIRjNkS2dosd")
+        let twitter = STTwitterAPI(oAuthConsumerKey: "DpGzxTKxAzW7jYLNF3pXyCq1R", consumerSecret: "F4i0xKVaQ8rbjnZEoUngzoeRQ5YDR4OBriyOs8XhgdbLcuJJCg", oauthToken: "4912299642-VVtj7EQbXRtGkjN4VKGw8CIdaYbLyJkVgUEJ2kc", oauthTokenSecret: "CUrPjIDUVU9LUU31ONOC1MenJW7ZJdpPkBIRjNkS2dosd")
         
-        twitter.verifyCredentialsWithUserSuccessBlock({ (username, userId) -> Void in
+        twitter?.verifyCredentials(userSuccessBlock: { (username, userId) -> Void in
             
-            twitter.getHomeTimelineSinceID(nil, count: 10, successBlock: { (statuses) -> Void in
+            twitter?.getHomeTimeline(sinceID: nil, count: 10, successBlock: { (statuses) -> Void in
                 
                 self.homeStatuses = [HomeStatus]()
                 
-                for status in statuses {
+                for status in statuses! {
                     let text = status["text"] as? String
 
                     
@@ -63,15 +63,15 @@ class ViewController: UICollectionViewController, UICollectionViewDelegateFlowLa
         
     }
     
-    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if let count = homeStatuses?.count {
             return count
         }
         return 0
     }
     
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-        let statusCell = collectionView.dequeueReusableCellWithReuseIdentifier(ViewController.cellId, forIndexPath: indexPath) as! StatusCell
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let statusCell = collectionView.dequeueReusableCell(withReuseIdentifier: ViewController.cellId, for: indexPath) as! StatusCell
         
         if let homeStatus = self.homeStatuses?[indexPath.item] {
             statusCell.homeStatus = homeStatus
@@ -80,23 +80,23 @@ class ViewController: UICollectionViewController, UICollectionViewDelegateFlowLa
         return statusCell
     }
     
-    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
         if let homeStatus = self.homeStatuses?[indexPath.item] {
-            if let name = homeStatus.name, screenName = homeStatus.screenName, text = homeStatus.text {
-                let attributedText = NSMutableAttributedString(string: name, attributes: [NSFontAttributeName: UIFont.systemFontOfSize(14)])
+            if let name = homeStatus.name, let screenName = homeStatus.screenName, let text = homeStatus.text {
+                let attributedText = NSMutableAttributedString(string: name, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)])
                 
-                attributedText.appendAttributedString(NSAttributedString(string: "\n@\(screenName)", attributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(14)]))
+                attributedText.append(NSAttributedString(string: "\n@\(screenName)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)]))
                 
-                attributedText.appendAttributedString(NSAttributedString(string: "\n\(text)", attributes: [NSFontAttributeName: UIFont.systemFontOfSize(14)]))
+                attributedText.append(NSAttributedString(string: "\n\(text)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
                 
-                let size = attributedText.boundingRectWithSize(CGSizeMake(view.frame.width - 80, 1000), options: NSStringDrawingOptions.UsesFontLeading.union(NSStringDrawingOptions.UsesLineFragmentOrigin), context: nil).size
+                let size = attributedText.boundingRect(with: CGSize(width: view.frame.width - 80, height: 1000), options: NSStringDrawingOptions.usesFontLeading.union(NSStringDrawingOptions.usesLineFragmentOrigin), context: nil).size
                 
-                return CGSizeMake(view.frame.width, size.height + 20)
+                return CGSize(width: view.frame.width, height: size.height + 20)
             }
         }
         
-        return CGSizeMake(view.frame.width, 80)
+        return CGSize(width: view.frame.width, height: 80)
     }
 
 }
@@ -107,18 +107,18 @@ class StatusCell: UICollectionViewCell {
         didSet {
             if let profileImageUrl = homeStatus?.profileImageUrl {
                 
-                if let name = homeStatus?.name, screenName = homeStatus?.screenName, text = homeStatus?.text {
-                    let attributedText = NSMutableAttributedString(string: name, attributes: [NSFontAttributeName: UIFont.systemFontOfSize(14)])
+                if let name = homeStatus?.name, let screenName = homeStatus?.screenName, let text = homeStatus?.text {
+                    let attributedText = NSMutableAttributedString(string: name, attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)])
                     
-                    attributedText.appendAttributedString(NSAttributedString(string: "\n@\(screenName)", attributes: [NSFontAttributeName: UIFont.boldSystemFontOfSize(14)]))
+                    attributedText.append(NSAttributedString(string: "\n@\(screenName)", attributes: [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 14)]))
                     
-                    attributedText.appendAttributedString(NSAttributedString(string: "\n\(text)", attributes: [NSFontAttributeName: UIFont.systemFontOfSize(14)]))
+                    attributedText.append(NSAttributedString(string: "\n\(text)", attributes: [NSFontAttributeName: UIFont.systemFont(ofSize: 14)]))
                     
                     statusTextView.attributedText = attributedText
                 }
                 
-                let url = NSURL(string: profileImageUrl)
-                NSURLSession.sharedSession().dataTaskWithURL(url!, completionHandler: { (data, response, error) -> Void in
+                let url = URL(string: profileImageUrl)
+                URLSession.shared.dataTask(with: url!, completionHandler: { (data, response, error) -> Void in
                     
                     if error != nil {
                         print(error)
@@ -127,7 +127,7 @@ class StatusCell: UICollectionViewCell {
                     
                     print("loaded image")
                     let image = UIImage(data: data!)
-                    dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    DispatchQueue.main.async(execute: { () -> Void in
                         self.profileImageView.image = image
                     })
                     
@@ -147,13 +147,13 @@ class StatusCell: UICollectionViewCell {
     
     let statusTextView: UITextView = {
         let textView = UITextView()
-        textView.editable = false
+        textView.isEditable = false
         return textView
     }()
     
     let profileImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .ScaleAspectFit
+        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
@@ -182,15 +182,15 @@ class StatusCell: UICollectionViewCell {
 }
 
 extension UIView {
-    func addConstraintsWithFormat(format: String, views: UIView...) {
+    func addConstraintsWithFormat(_ format: String, views: UIView...) {
         var viewsDictionary = [String: UIView]()
-        for (index, view) in views.enumerate() {
+        for (index, view) in views.enumerated() {
             let key = "v\(index)"
             viewsDictionary[key] = view
             view.translatesAutoresizingMaskIntoConstraints = false
         }
         
-        addConstraints(NSLayoutConstraint.constraintsWithVisualFormat(format, options: NSLayoutFormatOptions(), metrics: nil, views: viewsDictionary))
+        addConstraints(NSLayoutConstraint.constraints(withVisualFormat: format, options: NSLayoutFormatOptions(), metrics: nil, views: viewsDictionary))
     }
 }
 
